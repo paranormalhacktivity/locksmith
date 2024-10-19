@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require_relative '../lib/cipher_factory'
+
+def run_cli
+  options = {}
+
+  OptionParser.new do |opts|
+    opts.banner = "Usage: locksmith [options]"
+
+    opts.on("--algorithm ALGORITHM", "Specify the encryption algorithm (caesar, vigenere)") do |algorithm|
+      options[:algorithm] = algorithm
+    end
+
+    opts.on("--key KEY", "Specify the key for the cipher") do |key|
+      options[:key] = key
+    end
+
+    opts.on("--encrypt STRING", "Encrypt the provided string") do |string|
+      options[:action] = :encrypt
+      options[:string] = string
+    end
+
+    opts.on("--decrypt STRING", "Decrypt the provided string") do |string|
+      options[:action] = :decrypt
+      options[:string] = string
+    end
+
+    opts.on("--encrypt-file FILE", "Encrypt the provided file") do |file|
+      options[:action] = :encrypt_file
+      options[:input_file] = file
+    end
+
+    opts.on("--decrypt-file FILE", "Decrypt the provided file") do |file|
+      options[:action] = :decrypt_file
+      options[:input_file] = file
+    end
+
+    opts.on("--output FILE", "Specify the output file for file operations") do |file|
+      options[:output_file] = file
+    end
+  end.parse!
+
+  if options[:algorithm].nil?
+    puts "Error: You must specify an algorithm with --algorithm"
+    exit 1
+  end
+
+  cipher = CipherFactory.create(options)
+
+  case options[:action]
+  when :encrypt
+    puts cipher.encrypt(options[:string])
+  when :decrypt
+    puts cipher.decrypt(options[:string])
+  when :encrypt_file
+    if options[:output_file].nil?
+      puts "Error: You must specify an output file with --output"
+      exit 1
+    end
+    cipher.encrypt_file(options[:input_file], options[:output_file])
+    puts "File encrypted successfully and saved to #{options[:output_file]}"
+  when :decrypt_file
+    if options[:output_file].nil?
+      puts "Error: You must specify an output file with --output"
+      exit 1
+    end
+    cipher.decrypt_file(options[:input_file], options[:output_file])
+    puts "File decrypted successfully and saved to #{options[:output_file]}"
+  else
+    puts "Error: You must specify an action (e.g., --encrypt, --decrypt, --encrypt-file, --decrypt-file)"
+    exit 1
+  end
+end
+
+run_cli if __FILE__ == $0
+
