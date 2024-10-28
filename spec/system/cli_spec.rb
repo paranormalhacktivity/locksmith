@@ -297,4 +297,69 @@ RSpec.describe 'CLI System Test' do
       File.delete(output_file) if File.exist?(output_file)
     end
   end
+
+  describe 'Playfair Cipher' do
+    it 'encrypts a string through the CLI' do
+      output = `#{bin_path} --algorithm playfair --encrypt "hello" --key SECRET`.strip
+      expect(output).to eq('iskyiq')
+    end
+
+    it 'decrypts a string through the CLI' do
+      output = `#{bin_path} --algorithm playfair --decrypt "iskyiq" --key SECRET`.strip
+      expect(output).to eq('helxlo')
+    end
+
+    it 'encrypts a file through the CLI' do
+      input_file = 'spec/system/test_input.txt'
+      output_file = 'spec/system/test_output.txt'
+      File.write(input_file, 'hello, world!')
+
+      `#{bin_path} --algorithm playfair --encrypt-file #{input_file} --output #{output_file} --key SECRET`
+      encrypted_content = File.read(output_file)
+      expect(encrypted_content).to eq('iskyiq, ewfqkc!')
+
+      File.delete(input_file) if File.exist?(input_file)
+      File.delete(output_file) if File.exist?(output_file)
+    end
+
+    it 'decrypts a file through the CLI' do
+      input_file = 'spec/system/test_input.txt'
+      output_file = 'spec/system/test_output.txt'
+      File.write(input_file, 'iskyiq, ewfqkc!')
+
+      `#{bin_path} --algorithm playfair --decrypt-file #{input_file} --output #{output_file} --key SECRET`
+      decrypted_content = File.read(output_file)
+      expect(decrypted_content).to eq('helxlo, worldx!')
+
+      File.delete(input_file) if File.exist?(input_file)
+      File.delete(output_file) if File.exist?(output_file)
+    end
+
+    it 'raises an error when no key is provided' do
+      output = `#{bin_path} --algorithm playfair --encrypt "hello"`.strip
+      expect(output).to include("Error: You must specify a key with --key for the Playfair cipher")
+    end
+
+    it 'handles empty string encryption and decryption' do
+      output = `#{bin_path} --algorithm playfair --encrypt "" --key SECRET`.strip
+      expect(output).to eq("")
+    end
+
+    it 'handles empty file encryption and decryption' do
+      input_file = 'spec/system/empty_input.txt'
+      output_file = 'spec/system/empty_output.txt'
+      File.write(input_file, '') # Write an empty file
+
+      `#{bin_path} --algorithm playfair --encrypt-file #{input_file} --output #{output_file} --key SECRET`
+      encrypted_content = File.read(output_file)
+      expect(encrypted_content).to eq('')
+
+      `#{bin_path} --algorithm playfair --decrypt-file #{output_file} --output #{input_file} --key SECRET`
+      decrypted_content = File.read(input_file)
+      expect(decrypted_content).to eq('')
+
+      File.delete(input_file) if File.exist?(input_file)
+      File.delete(output_file) if File.exist?(output_file)
+    end
+  end
 end

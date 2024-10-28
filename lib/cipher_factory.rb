@@ -1,6 +1,8 @@
 require_relative 'caesar_cipher'
 require_relative 'vigenere_cipher'
+require_relative 'playfair_cipher'
 require_relative 'monoalphabetic_substitution_cipher'
+require_relative 'polyalphabetic_substitution_cipher'
 
 class CipherFactory
   def self.create(options)
@@ -40,6 +42,13 @@ class CipherFactory
         exit 1
       end
       PolyalphabeticSubstitutionCipher.new(key: key)
+    when 'playfair'
+      key = options[:key]
+      if key.nil?
+        puts "Error: You must specify a key with --key for the Playfair cipher"
+        exit 1
+      end
+      PlayfairCipher.new(key: key)
     else
       raise "Unknown algorithm: #{options[:algorithm]}"
     end

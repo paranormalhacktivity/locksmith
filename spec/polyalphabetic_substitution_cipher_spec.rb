@@ -65,7 +65,6 @@ RSpec.describe 'Polyalphabetic Substitution Cipher' do
     end
   end
 
-
   describe 'decrypt' do
     it 'decrypts a string using the Polyalphabetic Substitution cipher' do
       result = cipher.decrypt('ZINCS')
